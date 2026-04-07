@@ -15,12 +15,16 @@ class _InventoryPageState extends State<InventoryPage> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController quantityController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
+
+  String searchQuery = '';
 
   @override
   void dispose() {
     nameController.dispose();
     quantityController.dispose();
     priceController.dispose();
+    searchController.dispose();
     super.dispose();
   }
 
@@ -149,37 +153,83 @@ class _InventoryPageState extends State<InventoryPage> {
 
           final items = snapshot.data ?? [];
 
-          if (items.isEmpty) {
-            return const Center(
-              child: Text('No items yet.'),
-            );
-          }
+          final filteredItems = items.where((item) {
+            return item.name.toLowerCase().contains(searchQuery.toLowerCase());
+          }).toList();
 
-          return ListView.builder(
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final item = items[index];
+          final totalInventoryValue = filteredItems.fold<double>(
+            0.0,
+            (sum, item) => sum + (item.quantity * item.price),
+          );
 
-              return ListTile(
-                title: Text(item.name),
-                subtitle: Text(
-                  'Qty: ${item.quantity} | \$${item.price.toStringAsFixed(2)}',
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: TextField(
+                  controller: searchController,
+                  decoration: const InputDecoration(
+                    labelText: 'Search by item name',
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      searchQuery = value.trim();
+                    });
+                  },
                 ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () => openItemDialog(item: item),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Total Inventory Value: \$${totalInventoryValue.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () => service.deleteItem(item.id),
-                    ),
-                  ],
+                  ),
                 ),
-              );
-            },
+              ),
+              Expanded(
+                child: filteredItems.isEmpty
+                    ? Center(
+                        child: Text(
+                          items.isEmpty
+                              ? 'No items yet.'
+                              : 'No items match your search.',
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: filteredItems.length,
+                        itemBuilder: (context, index) {
+                          final item = filteredItems[index];
+
+                          return ListTile(
+                            title: Text(item.name),
+                            subtitle: Text(
+                              'Qty: ${item.quantity} | \$${item.price.toStringAsFixed(2)}',
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  onPressed: () => openItemDialog(item: item),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () => service.deleteItem(item.id),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
           );
         },
       ),
