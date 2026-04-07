@@ -1,17 +1,52 @@
-# inclass12
+Inventory App (inclass12)
 
-A new Flutter project.
+This Flutter application is an inventory management system that uses Firebase Firestore for real-time data storage and updates. Users can add, edit, delete, and view inventory items, with changes reflected instantly in the UI.
 
-## Getting Started
+Features
+Core Features
+Add new inventory items
+Edit existing items
+Delete items
+Real-time updates using Firestore
+Form validation for:
+Empty fields
+Invalid numbers
+Negative values
+Displays loading, empty, and error states
+Uses StreamBuilder with ListView.builder for dynamic UI
+Enhanced Features
+Search by Item Name
+Users can filter items in real time using a search bar.
+Total Inventory Value
+The app calculates and displays the total value of all visible items (quantity × price).
+Technologies Used
+Flutter
+Firebase Core
+Cloud Firestore
+Project Structure
+lib/
+  main.dart
+  firebase_options.dart
+  models/
+    item.dart
+  services/
+    firestore_service.dart
+  screens/
+    inventory_page.dart
+How to Run
+Clone the repository
 
-This project is a starting point for a Flutter application.
+Install dependencies:
 
-A few resources to get you started if this is your first Flutter project:
+flutter pub get
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Run the app:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+flutter run -d chrome
+Notes
+Firestore must be enabled in Firebase Console
+Collection name used: items
+Each item contains:
+name (String)
+quantity (int)
+price (double)
